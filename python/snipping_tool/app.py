@@ -15,6 +15,7 @@ DEFAULT_DELAY_MS = int(os.environ.get("CAPTURE_DELAY_MS", "200"))
 
 class App:
     def __init__(self):
+        logger.log("App.__init__: start")
         self.root = tk.Tk()
         self.root.overrideredirect(True)  # No window chrome
         self.root.attributes("-topmost", True)
@@ -84,10 +85,21 @@ class App:
         y = max(0, sh - h - offset_px)
         self.root.geometry(f"{w}x{h}+{x}+{y}")
         self.root.deiconify()
+        logger.log("App.__init__: window shown")
 
         # Tray icon
-        self.tray = Tray(self.capture, self.show, self.exit)
-        self.tray.run()
+        self.tray = None
+        try:
+            if os.environ.get("DISABLE_TRAY", "0") not in ("1", "true", "True"): 
+                logger.log("App.__init__: creating tray")
+                self.tray = Tray(self.capture, self.show, self.exit)
+                self.tray.run()
+                logger.log("App.__init__: tray started")
+            else:
+                logger.log("App.__init__: tray disabled by env")
+        except Exception as ex:
+            logger.log_error(ex, "tray_init")
+            self.tray = None
 
     def _start_move(self, event):
         self._x = event.x
@@ -105,7 +117,8 @@ class App:
 
     def exit(self):
         try:
-            self.tray.stop()
+            if self.tray:
+                self.tray.stop()
         except Exception:
             pass
         self.root.quit()
