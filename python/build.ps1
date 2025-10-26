@@ -98,7 +98,8 @@ function Build-Exe {
         '--onefile', '--name', $name,
         '--hidden-import','snipping_tool.core.capture',
         '--hidden-import','snipping_tool.core.storage',
-        '--hidden-import','snipping_tool.core.logger'
+        '--hidden-import','snipping_tool.core.logger',
+        '--hidden-import','PIL.ImageTk'
     )
     if (-not $WithConsole) { $args += '--noconsole' }
     if ($Version -and $Version.Trim().Length -gt 0) {
